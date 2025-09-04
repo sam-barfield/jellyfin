@@ -1286,6 +1286,14 @@ namespace Emby.Server.Implementations.Dto
                         dto.SeriesStudio = episodeSeries.Studios.FirstOrDefault();
                     }
                 }
+
+                if (options.ContainsField(ItemFields.IsAnime))
+                {
+                    if (_libraryManager.GetCollectionFolders(item)?.FirstOrDefault()?.Name == "Anime")
+                    {
+                        dto.IsAnime = true;
+                    }
+                }
             }
 
             // Add SeriesInfo

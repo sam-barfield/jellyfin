@@ -96,6 +96,11 @@ namespace MediaBrowser.Model.Querying
         MediaSources,
 
         /// <summary>
+        /// Is item an anime episode.
+        /// </summary>
+        IsAnime,
+
+        /// <summary>
         /// The original title.
         /// </summary>
         OriginalTitle,
