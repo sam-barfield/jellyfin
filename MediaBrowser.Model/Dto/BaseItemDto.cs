@@ -467,6 +467,11 @@ namespace MediaBrowser.Model.Dto
         public MediaStream[] MediaStreams { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether is episode an anime.
+        /// </summary>
+        public bool IsAnime { get; set; }
+
+        /// <summary>
         /// Gets or sets the audio languages available in this media.
         /// </summary>
         public string[] AudioLanguages { get; set; }
