@@ -467,6 +467,16 @@ namespace MediaBrowser.Model.Dto
         public MediaStream[] MediaStreams { get; set; }
 
         /// <summary>
+        /// Gets or sets the audio languages available in this media.
+        /// </summary>
+        public string[] AudioLanguages { get; set; }
+
+        /// <summary>
+        /// Gets or sets the subtitle languages available in this media.
+        /// </summary>
+        public string[] SubtitleLanguages { get; set; }
+
+        /// <summary>
         /// Gets or sets the type of the video.
         /// </summary>
         /// <value>The type of the video.</value>

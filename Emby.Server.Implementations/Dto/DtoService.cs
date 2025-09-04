@@ -1171,7 +1171,7 @@ namespace Emby.Server.Implementations.Dto
                 dto.ExtraType = video.ExtraType;
             }
 
-            if (options.ContainsField(ItemFields.MediaStreams))
+            if (options.ContainsField(ItemFields.MediaStreams) || options.ContainsField(ItemFields.AudioLanguages) || options.ContainsField(ItemFields.SubtitleLanguages))
             {
                 // Add VideoInfo
                 if (item is IHasMediaSources)
@@ -1197,7 +1197,30 @@ namespace Emby.Server.Implementations.Dto
                         mediaStreams = _mediaSourceManager.GetStaticMediaSources(item, true)[0].MediaStreams.ToArray();
                     }
 
-                    dto.MediaStreams = mediaStreams;
+                    if (options.ContainsField(ItemFields.MediaStreams))
+                    {
+                        dto.MediaStreams = mediaStreams;
+                    }
+
+                    // Derive available AudioLanguages from MediaStreams
+                    if (options.ContainsField(ItemFields.AudioLanguages) && mediaStreams is not null)
+                    {
+                        dto.AudioLanguages = mediaStreams
+                            .Where(m => m.Type == MediaStreamType.Audio && !string.IsNullOrEmpty(m.Language))
+                            .Select(m => m.Language)
+                            .Distinct()
+                            .ToArray();
+                    }
+
+                    // Derive available SubtitleLanguages from MediaStreams
+                    if (options.ContainsField(ItemFields.SubtitleLanguages) && mediaStreams is not null)
+                    {
+                        dto.SubtitleLanguages = mediaStreams
+                            .Where(m => m.Type == MediaStreamType.Subtitle && !string.IsNullOrEmpty(m.Language))
+                            .Select(m => m.Language)
+                            .Distinct()
+                            .ToArray();
+                    }
                 }
             }
 

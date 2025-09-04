@@ -191,6 +191,16 @@ namespace MediaBrowser.Model.Querying
         MediaStreams,
 
         /// <summary>
+        /// The audio languages available in the media. Derived from MediaStreams.
+        /// </summary>
+        AudioLanguages,
+
+        /// <summary>
+        /// The subtitle languages available in the media. Derived from MediaStreams.
+        /// </summary>
+        SubtitleLanguages,
+
+        /// <summary>
         /// The season user data.
         /// </summary>
         SeasonUserData,
