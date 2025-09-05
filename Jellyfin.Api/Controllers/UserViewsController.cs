@@ -131,11 +131,11 @@ public class UserViewsController : BaseJellyfinApiController
     /// Starts a library scan to record dubbed / subbed counts for series and seasons.
     /// </summary>
     /// <param name="userId">User id.</param>
-    /// <returns>A <see cref="NoContentResult"/>.</returns>
+    /// <returns>A <see cref="OkResult"/>.</returns>
     [HttpPost("Library/DubSubScan")]
     [Authorize(Policy = Policies.RequiresElevation)]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<ActionResult> DubSubScanLibrary([FromQuery] Guid? userId)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult<string>> DubSubScanLibrary([FromQuery] Guid? userId)
     {
         userId = RequestHelpers.GetUserId(User, userId);
         var user = _userManager.GetUserById(userId.Value) ?? throw new ResourceNotFoundException();
@@ -153,11 +153,20 @@ public class UserViewsController : BaseJellyfinApiController
 
         _logger.LogInformation("Found {Folders} folders to scan", dtos.Length);
 
+        var totalSeriesCount = 0;
+        var totalSeasonCount = 0;
+        var totalEpisodeCount = 0;
+
         // For each folder, loop through each series, season and episode and extract total dub/sub counts
         foreach (var folder in dtos)
         {
             var folderItem = _libraryManager.GetItemById(folder.Id);
             if (folderItem is not Folder folderInstance)
+            {
+                continue;
+            }
+
+            if (folder.Name != "Anime") // TODO Don't hardcode this, make it a user changeable setting.
             {
                 continue;
             }
@@ -214,6 +223,7 @@ public class UserViewsController : BaseJellyfinApiController
                         }
 
                         totalEpisodes++;
+                        totalEpisodeCount++;
 
                         // Mark episode for update after modifying its properties
                         if (episode.ItemDubbedCount != previousEpDubbedCount || episode.ItemSubbedCount != previousEpSubbedCount)
@@ -268,6 +278,8 @@ public class UserViewsController : BaseJellyfinApiController
                     {
                         await _libraryManager.UpdateItemsAsync(episodesToUpdate, season, ItemUpdateType.MetadataEdit, CancellationToken.None).ConfigureAwait(false);
                     }
+
+                    totalSeasonCount++;
                 }
 
                 // Update series properties as before
@@ -311,6 +323,8 @@ public class UserViewsController : BaseJellyfinApiController
                 {
                     await _libraryManager.UpdateItemsAsync(seasonsToUpdate, series, ItemUpdateType.MetadataEdit, CancellationToken.None).ConfigureAwait(false);
                 }
+
+                totalSeriesCount++;
             }
 
             // Update all modified series
@@ -322,7 +336,7 @@ public class UserViewsController : BaseJellyfinApiController
 
         _logger.LogInformation("Dub sub scan complete.");
 
-        return NoContent();
+        return Ok($"Scan complete. Processed {totalSeriesCount} series, {totalSeasonCount} seasons, and {totalEpisodeCount} episodes.");
     }
 
     /// <summary>
