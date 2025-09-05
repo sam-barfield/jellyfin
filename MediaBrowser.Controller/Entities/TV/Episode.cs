@@ -69,6 +69,10 @@ namespace MediaBrowser.Controller.Entities.TV
         [JsonIgnore]
         protected override bool EnableDefaultVideoUserDataKeys => false;
 
+        public int? ItemDubbedCount { get; set; }
+
+        public int? ItemSubbedCount { get; set; }
+
         /// <summary>
         /// Gets the Episode's Series Instance.
         /// </summary>

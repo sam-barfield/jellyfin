@@ -1171,7 +1171,7 @@ namespace Emby.Server.Implementations.Dto
                 dto.ExtraType = video.ExtraType;
             }
 
-            if (options.ContainsField(ItemFields.MediaStreams) || options.ContainsField(ItemFields.AudioLanguages) || options.ContainsField(ItemFields.SubtitleLanguages))
+            if (options.ContainsField(ItemFields.MediaStreams))
             {
                 // Add VideoInfo
                 if (item is IHasMediaSources)
@@ -1200,26 +1200,6 @@ namespace Emby.Server.Implementations.Dto
                     if (options.ContainsField(ItemFields.MediaStreams))
                     {
                         dto.MediaStreams = mediaStreams;
-                    }
-
-                    // Derive available AudioLanguages from MediaStreams
-                    if (options.ContainsField(ItemFields.AudioLanguages) && mediaStreams is not null)
-                    {
-                        dto.AudioLanguages = mediaStreams
-                            .Where(m => m.Type == MediaStreamType.Audio && !string.IsNullOrEmpty(m.Language))
-                            .Select(m => m.Language)
-                            .Distinct()
-                            .ToArray();
-                    }
-
-                    // Derive available SubtitleLanguages from MediaStreams
-                    if (options.ContainsField(ItemFields.SubtitleLanguages) && mediaStreams is not null)
-                    {
-                        dto.SubtitleLanguages = mediaStreams
-                            .Where(m => m.Type == MediaStreamType.Subtitle && !string.IsNullOrEmpty(m.Language))
-                            .Select(m => m.Language)
-                            .Distinct()
-                            .ToArray();
                     }
                 }
             }
@@ -1294,6 +1274,12 @@ namespace Emby.Server.Implementations.Dto
                         dto.IsAnime = true;
                     }
                 }
+
+                if (options.ContainsField(ItemFields.DubSubCount))
+                {
+                    dto.ItemDubbedCount = episode.ItemDubbedCount;
+                    dto.ItemSubbedCount = episode.ItemSubbedCount;
+                }
             }
 
             // Add SeriesInfo
@@ -1304,6 +1290,20 @@ namespace Emby.Server.Implementations.Dto
                 dto.AirDays = series.AirDays;
                 dto.AirTime = series.AirTime;
                 dto.Status = series.Status?.ToString();
+
+                if (options.ContainsField(ItemFields.IsAnime))
+                {
+                    if (_libraryManager.GetCollectionFolders(item)?.FirstOrDefault()?.Name == "Anime")
+                    {
+                        dto.IsAnime = true;
+                    }
+                }
+
+                if (options.ContainsField(ItemFields.DubSubCount))
+                {
+                    dto.ItemDubbedCount = series.ItemDubbedCount;
+                    dto.ItemSubbedCount = series.ItemSubbedCount;
+                }
             }
 
             // Add SeasonInfo
@@ -1320,6 +1320,24 @@ namespace Emby.Server.Implementations.Dto
                     if (series is not null)
                     {
                         dto.SeriesStudio = series.Studios.FirstOrDefault();
+                    }
+                }
+
+                if (options.ContainsField(ItemFields.IsAnime))
+                {
+                    if (_libraryManager.GetCollectionFolders(item)?.FirstOrDefault()?.Name == "Anime")
+                    {
+                        dto.IsAnime = true;
+                    }
+                }
+
+                if (options.ContainsField(ItemFields.DubSubCount))
+                {
+                    series ??= season.Series;
+                    if (series is not null)
+                    {
+                        dto.ItemDubbedCount = season.ItemDubbedCount;
+                        dto.ItemSubbedCount = season.ItemSubbedCount;
                     }
                 }
 

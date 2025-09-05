@@ -846,10 +846,25 @@ public sealed class BaseItemRepository
             hasSeriesName.SeriesPresentationUniqueKey = entity.SeriesPresentationUniqueKey;
         }
 
+        if (dto is Season season)
+        {
+            season.ItemDubbedCount = entity.ItemDubbedCount;
+            season.ItemSubbedCount = entity.ItemSubbedCount;
+        }
+
+        if (dto is Series series)
+        {
+            series.ItemDubbedCount = entity.ItemDubbedCount;
+            series.ItemSubbedCount = entity.ItemSubbedCount;
+        }
+
         if (dto is Episode episode)
         {
             episode.SeasonName = entity.SeasonName;
             episode.SeasonId = entity.SeasonId.GetValueOrDefault();
+
+            episode.ItemDubbedCount = entity.ItemDubbedCount;
+            episode.ItemSubbedCount = entity.ItemSubbedCount;
         }
 
         if (dto is IHasArtist hasArtists)
@@ -1015,6 +1030,21 @@ public sealed class BaseItemRepository
         {
             entity.SeasonName = episode.SeasonName;
             entity.SeasonId = episode.SeasonId;
+
+            entity.ItemDubbedCount = episode.ItemDubbedCount;
+            entity.ItemSubbedCount = episode.ItemSubbedCount;
+        }
+
+        if (dto is Season season)
+        {
+            entity.ItemDubbedCount = season.ItemDubbedCount;
+            entity.ItemSubbedCount = season.ItemSubbedCount;
+        }
+
+        if (dto is Series series)
+        {
+            entity.ItemDubbedCount = series.ItemDubbedCount;
+            entity.ItemSubbedCount = series.ItemSubbedCount;
         }
 
         if (dto is IHasArtist hasArtists)

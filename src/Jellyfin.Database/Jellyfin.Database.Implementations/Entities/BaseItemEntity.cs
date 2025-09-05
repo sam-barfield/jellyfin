@@ -183,4 +183,7 @@ public class BaseItemEntity
     // public BaseItemEntity? TopParent { get; set; }
     // public ICollection<BaseItemEntity>? AllChildren { get; set; }
     // public ICollection<BaseItemEntity>? SeasonEpisodes { get; set; }
+    public int? ItemDubbedCount { get; set; }
+
+    public int? ItemSubbedCount { get; set; }
 }

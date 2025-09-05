@@ -35,6 +35,10 @@ namespace MediaBrowser.Controller.Entities.TV
 
         public string AirTime { get; set; }
 
+        public int? ItemDubbedCount { get; set; }
+
+        public int? ItemSubbedCount { get; set; }
+
         [JsonIgnore]
         public override bool SupportsAddingToPlaylist => true;
 

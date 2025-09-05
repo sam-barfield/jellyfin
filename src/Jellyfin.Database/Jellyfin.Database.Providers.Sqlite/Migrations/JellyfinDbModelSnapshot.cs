@@ -15,7 +15,7 @@ namespace Jellyfin.Server.Implementations.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.7");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.8");
 
             modelBuilder.Entity("Jellyfin.Database.Implementations.Entities.AccessSchedule", b =>
                 {
@@ -250,6 +250,12 @@ namespace Jellyfin.Server.Implementations.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsVirtualItem")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ItemDubbedCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ItemSubbedCount")
                         .HasColumnType("INTEGER");
 
                     b.Property<float?>("LUFS")

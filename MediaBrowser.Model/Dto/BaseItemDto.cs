@@ -809,5 +809,19 @@ namespace MediaBrowser.Model.Dto
         /// </summary>
         /// <value>The current program.</value>
         public BaseItemDto CurrentProgram { get; set; }
+
+        /// <summary>
+        /// Gets or sets the dubbed status of the item.
+        /// 2 = Fully Dubbed (For Series or Season Items) or is dubbed for episode.
+        /// 1 = Partially Dubbed
+        /// 0 = No Dubs (For Series or Season Items) or is not dubbed for episode.
+        /// </summary>
+        public int? ItemDubbedCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the subbed count of the item.
+        /// See dubbed description for explaination.
+        /// </summary>
+        public int? ItemSubbedCount { get; set; }
     }
 }
