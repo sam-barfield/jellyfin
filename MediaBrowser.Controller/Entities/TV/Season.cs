@@ -83,6 +83,10 @@ namespace MediaBrowser.Controller.Entities.TV
         [JsonIgnore]
         public Guid SeriesId { get; set; }
 
+        public int? ItemDubbedCount { get; set; }
+
+        public int? ItemSubbedCount { get; set; }
+
         public override double GetDefaultPrimaryImageAspectRatio()
         {
             double value = 2;
