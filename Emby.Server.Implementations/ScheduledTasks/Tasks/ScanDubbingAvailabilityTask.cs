@@ -4,17 +4,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Data.Enums;
-using Jellyfin.Database.Implementations.Entities;
-using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Persistence;
-using MediaBrowser.Model.Configuration;
 using MediaBrowser.Model.Entities;
-using MediaBrowser.Model.Globalization;
 using MediaBrowser.Model.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Episode = MediaBrowser.Controller.Entities.TV.Episode;
 using Season = MediaBrowser.Controller.Entities.TV.Season;
@@ -254,9 +249,9 @@ public partial class ScanDubbingAvailabilityTask : IScheduledTask
         var languages = item.GetMediaStreams()
             .Where(m => m.Type == type && !string.IsNullOrEmpty(m.Language))
             .Select(m => m.Language)
-            .Distinct(StringComparer.OrdinalIgnoreCase);
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
-        // If there are any streams, and any match "English"
-        return languages.Any() && languages.Any(languageCodes.Contains);
+        return languages.Count > 0 && languages.Any(languageCodes.Contains);
     }
 }
