@@ -867,10 +867,25 @@ public sealed class BaseItemRepository
             hasSeriesName.SeriesPresentationUniqueKey = entity.SeriesPresentationUniqueKey;
         }
 
+        if (dto is Series series)
+        {
+            series.DubAvailable = ParseDubAvailability(entity.DubAvailable);
+            series.SubAvailable = ParseDubAvailability(entity.SubAvailable);
+        }
+
+        if (dto is Season season)
+        {
+            season.DubAvailable = ParseDubAvailability(entity.DubAvailable);
+            season.SubAvailable = ParseDubAvailability(entity.SubAvailable);
+        }
+
         if (dto is Episode episode)
         {
             episode.SeasonName = entity.SeasonName;
             episode.SeasonId = entity.SeasonId.GetValueOrDefault();
+
+            episode.DubAvailable = ParseDubAvailability(entity.DubAvailable);
+            episode.SubAvailable = ParseDubAvailability(entity.SubAvailable);
         }
 
         if (dto is IHasArtist hasArtists)
@@ -1032,10 +1047,25 @@ public sealed class BaseItemRepository
             entity.SeriesPresentationUniqueKey = hasSeriesName.SeriesPresentationUniqueKey;
         }
 
+        if (dto is Series series)
+        {
+            entity.DubAvailable = series.DubAvailable?.ToString();
+            entity.SubAvailable = series.SubAvailable?.ToString();
+        }
+
+        if (dto is Season season)
+        {
+            entity.DubAvailable = season.DubAvailable?.ToString();
+            entity.SubAvailable = season.SubAvailable?.ToString();
+        }
+
         if (dto is Episode episode)
         {
             entity.SeasonName = episode.SeasonName;
             entity.SeasonId = episode.SeasonId;
+
+            entity.DubAvailable = episode.DubAvailable?.ToString();
+            entity.SubAvailable = episode.SubAvailable?.ToString();
         }
 
         if (dto is IHasArtist hasArtists)
@@ -2549,5 +2579,23 @@ public sealed class BaseItemRepository
             .ToArray();
 
         return artists.GroupBy(e => e.Name).ToDictionary(e => e.Key!, e => e.Select(f => DeserializeBaseItem(f)).Cast<MusicArtist>().ToArray());
+    }
+
+    private static DubAvailability? ParseDubAvailability(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        value = value.Trim();
+
+        // Try name case-insensitive
+        if (Enum.TryParse<DubAvailability>(value, ignoreCase: true, out var byName))
+        {
+            return byName;
+        }
+
+        return null;
     }
 }
