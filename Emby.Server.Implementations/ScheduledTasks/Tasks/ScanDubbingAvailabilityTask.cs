@@ -252,6 +252,6 @@ public partial class ScanDubbingAvailabilityTask : IScheduledTask
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        return languages.Count > 0 && languages.Any(languageCodes.Contains);
+        return languages.Count > 0 && languages.Any(lang => languageCodes.Contains(lang, StringComparer.OrdinalIgnoreCase));
     }
 }
