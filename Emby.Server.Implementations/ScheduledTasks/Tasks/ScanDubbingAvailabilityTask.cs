@@ -4,17 +4,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Data.Enums;
-using Jellyfin.Database.Implementations.Entities;
-using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Persistence;
-using MediaBrowser.Model.Configuration;
 using MediaBrowser.Model.Entities;
-using MediaBrowser.Model.Globalization;
 using MediaBrowser.Model.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Episode = MediaBrowser.Controller.Entities.TV.Episode;
 using Season = MediaBrowser.Controller.Entities.TV.Season;
@@ -271,5 +266,6 @@ public partial class ScanDubbingAvailabilityTask : IScheduledTask
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
+        return languages.Count > 0 && languages.Any(lang => languageCodes.Contains(lang, StringComparer.OrdinalIgnoreCase));
     }
 }
