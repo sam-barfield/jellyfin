@@ -794,5 +794,22 @@ namespace MediaBrowser.Model.Dto
         /// </summary>
         /// <value>The current program.</value>
         public BaseItemDto CurrentProgram { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether is episode an anime.
+        /// </summary>
+        public bool IsAnime { get; set; }
+
+        /// <summary>
+        /// Gets or sets the dub availability.
+        /// </summary>
+        /// <value>The type.</value>
+        public DubAvailability? DubAvailable { get; set; }
+
+        /// <summary>
+        /// Gets or sets subtitle availabiltiy.
+        /// </summary>
+        /// <value>The type.</value>
+        public DubAvailability? SubAvailable { get; set; }
     }
 }
