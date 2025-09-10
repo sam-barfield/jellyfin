@@ -138,6 +138,10 @@ namespace MediaBrowser.Controller.Entities.TV
         [JsonIgnore]
         public Guid SeriesId { get; set; }
 
+        public DubAvailability? DubAvailable { get; set; }
+
+        public DubAvailability? SubAvailable { get; set; }
+
         public string FindSeriesSortName()
         {
             var series = Series;
