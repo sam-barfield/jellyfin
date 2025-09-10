@@ -288,4 +288,10 @@ public class ServerConfiguration : BaseApplicationConfiguration
     /// Gets or sets a value indicating whether old authorization methods are allowed.
     /// </summary>
     public bool EnableLegacyAuthorization { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets language codes used to determine dubbed sources.
+    /// </summary>
+    /// <value>Language codes.</value>
+    public string[] DubbingLanguageCodes { get; set; } = new[] { "en", "eng", "en-us", "en-gb", "en-ca", "en-au", "en-in", "english" };
 }
