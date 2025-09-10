@@ -35,6 +35,10 @@ namespace MediaBrowser.Controller.Entities.TV
 
         public string AirTime { get; set; }
 
+        public DubAvailability? DubAvailable { get; set; }
+
+        public DubAvailability? SubAvailable { get; set; }
+
         [JsonIgnore]
         public override bool SupportsAddingToPlaylist => true;
 

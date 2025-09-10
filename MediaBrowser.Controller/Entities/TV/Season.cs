@@ -24,6 +24,10 @@ namespace MediaBrowser.Controller.Entities.TV
     [RequiresSourceSerialisation]
     public class Season : Folder, IHasSeries, IHasLookupInfo<SeasonInfo>
     {
+        public DubAvailability? DubAvailable { get; set; }
+
+        public DubAvailability? SubAvailable { get; set; }
+
         [JsonIgnore]
         public override bool SupportsAddingToPlaylist => true;
 

@@ -38,6 +38,7 @@ namespace MediaBrowser.Model.Configuration
             UseCustomTagDelimiters = false;
             CustomTagDelimiters = _defaultTagDelimiters;
             DelimiterWhitelist = Array.Empty<string>();
+            DubbingIconsEnabled = false;
         }
 
         public bool Enabled { get; set; } = true;
@@ -134,6 +135,9 @@ namespace MediaBrowser.Model.Configuration
         public bool AutomaticallyAddToCollection { get; set; }
 
         public EmbeddedSubtitleOptions AllowEmbeddedSubtitles { get; set; }
+
+        [DefaultValue(false)]
+        public bool? DubbingIconsEnabled { get; set; }
 
         public TypeOptions[] TypeOptions { get; set; }
 

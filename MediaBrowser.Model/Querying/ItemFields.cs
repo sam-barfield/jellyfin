@@ -248,6 +248,16 @@ namespace MediaBrowser.Model.Querying
         /// <summary>
         /// The special feature count.
         /// </summary>
-        SpecialFeatureCount
+        SpecialFeatureCount,
+
+        /// <summary>
+        /// Is item an anime episode.
+        /// </summary>
+        IsAnime,
+
+        /// <summary>
+        /// Provide dub and sub availability data for results.
+        /// </summary>
+        DubAvailability
     }
 }
