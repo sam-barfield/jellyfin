@@ -192,6 +192,9 @@ namespace Jellyfin.Server.Implementations.Migrations
                     b.Property<DateTime?>("DateModified")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("DubAvailable")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("TEXT");
 
@@ -337,6 +340,9 @@ namespace Jellyfin.Server.Implementations.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Studios")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SubAvailable")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Tagline")
