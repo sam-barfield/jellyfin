@@ -11,14 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Jellyfin.Server.Implementations.Migrations
 {
     [DbContext(typeof(JellyfinDbContext))]
-    [Migration("20250909002435_AddDubSubAvailability")]
+    [Migration("20251006232722_AddDubSubAvailability")]
     partial class AddDubSubAvailability
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.6");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.9");
 
             modelBuilder.Entity("Jellyfin.Database.Implementations.Entities.AccessSchedule", b =>
                 {
@@ -427,7 +427,7 @@ namespace Jellyfin.Server.Implementations.Migrations
                     b.Property<byte[]>("Blurhash")
                         .HasColumnType("BLOB");
 
-                    b.Property<DateTime>("DateModified")
+                    b.Property<DateTime?>("DateModified")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Height")
@@ -1008,16 +1008,16 @@ namespace Jellyfin.Server.Implementations.Migrations
                     b.Property<Guid>("PeopleId")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("ListOrder")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Role")
                         .HasColumnType("TEXT");
+
+                    b.Property<int?>("ListOrder")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("SortOrder")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("ItemId", "PeopleId");
+                    b.HasKey("ItemId", "PeopleId", "Role");
 
                     b.HasIndex("PeopleId");
 
@@ -1459,6 +1459,16 @@ namespace Jellyfin.Server.Implementations.Migrations
                     b.Navigation("Item");
                 });
 
+            modelBuilder.Entity("Jellyfin.Database.Implementations.Entities.BaseItemEntity", b =>
+                {
+                    b.HasOne("Jellyfin.Database.Implementations.Entities.BaseItemEntity", "DirectParent")
+                        .WithMany("DirectChildren")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("DirectParent");
+                });
+
             modelBuilder.Entity("Jellyfin.Database.Implementations.Entities.BaseItemImageInfo", b =>
                 {
                     b.HasOne("Jellyfin.Database.Implementations.Entities.BaseItemEntity", "Item")
@@ -1660,6 +1670,8 @@ namespace Jellyfin.Server.Implementations.Migrations
                     b.Navigation("Chapters");
 
                     b.Navigation("Children");
+
+                    b.Navigation("DirectChildren");
 
                     b.Navigation("Images");
 
