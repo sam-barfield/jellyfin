@@ -1233,6 +1233,20 @@ namespace Emby.Server.Implementations.Dto
                         dto.SeriesStudio = episodeSeries.Studios.FirstOrDefault();
                     }
                 }
+
+                if (options.ContainsField(ItemFields.IsAnime))
+                {
+                    if (_libraryManager.GetCollectionFolders(item)?.FirstOrDefault()?.Name == "Anime")
+                    {
+                        dto.IsAnime = true;
+                    }
+                }
+
+                if (options.ContainsField(ItemFields.DubAvailability))
+                {
+                    dto.DubAvailable = episode.DubAvailable;
+                    dto.SubAvailable = episode.SubAvailable;
+                }
             }
 
             // Add SeriesInfo
@@ -1243,6 +1257,20 @@ namespace Emby.Server.Implementations.Dto
                 dto.AirDays = series.AirDays;
                 dto.AirTime = series.AirTime;
                 dto.Status = series.Status?.ToString();
+
+                if (options.ContainsField(ItemFields.IsAnime))
+                {
+                    if (_libraryManager.GetCollectionFolders(item)?.FirstOrDefault()?.Name == "Anime")
+                    {
+                        dto.IsAnime = true;
+                    }
+                }
+
+                if (options.ContainsField(ItemFields.DubAvailability))
+                {
+                    dto.DubAvailable = series.DubAvailable;
+                    dto.SubAvailable = series.SubAvailable;
+                }
             }
 
             // Add SeasonInfo
@@ -1274,6 +1302,24 @@ namespace Emby.Server.Implementations.Dto
                         {
                             AttachPrimaryImageAspectRatio(dto, series);
                         }
+                    }
+                }
+
+                if (options.ContainsField(ItemFields.IsAnime))
+                {
+                    if (_libraryManager.GetCollectionFolders(item)?.FirstOrDefault()?.Name == "Anime")
+                    {
+                        dto.IsAnime = true;
+                    }
+                }
+
+                if (options.ContainsField(ItemFields.DubAvailability))
+                {
+                    series ??= season.Series;
+                    if (series is not null)
+                    {
+                        dto.DubAvailable = season.DubAvailable;
+                        dto.SubAvailable = season.SubAvailable;
                     }
                 }
             }
