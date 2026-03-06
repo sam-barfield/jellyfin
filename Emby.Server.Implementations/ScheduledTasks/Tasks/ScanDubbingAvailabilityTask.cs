@@ -65,10 +65,9 @@ public partial class ScanDubbingAvailabilityTask : IScheduledTask
         var totalSeriesToScan = 0;
         var totalSeriesComplete = 0;
 
-        var languageCodesRaw = _configurationManager.Configuration.DubbingLanguageCodes;
-        var languageCodes = languageCodesRaw?.GetValue(0)?.ToString()?.Split(',');
+        var languageCodes = NormalizeLanguageCodes(_configurationManager.Configuration.DubbingLanguageCodes);
 
-        if (languageCodes is null)
+        if (languageCodes.Length == 0)
         {
             _logger.LogError("No language codes configured.");
             return;
@@ -244,11 +243,26 @@ public partial class ScanDubbingAvailabilityTask : IScheduledTask
                 : DubAvailability.Partial;
     }
 
+    private static string[] NormalizeLanguageCodes(IEnumerable<string>? configuredCodes)
+    {
+        if (configuredCodes is null)
+        {
+            return Array.Empty<string>();
+        }
+
+        return configuredCodes
+            .Where(c => !string.IsNullOrWhiteSpace(c))
+            .SelectMany(c => c.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            .Where(c => !string.IsNullOrWhiteSpace(c))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
+
     private static bool HasEnglishStream(BaseItem item, MediaStreamType type, string[] languageCodes)
     {
         var languages = item.GetMediaStreams()
             .Where(m => m.Type == type && !string.IsNullOrEmpty(m.Language))
-            .Select(m => m.Language)
+            .Select(m => m.Language!.Trim())
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
