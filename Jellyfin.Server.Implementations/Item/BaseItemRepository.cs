@@ -1235,7 +1235,8 @@ public sealed class BaseItemRepository
             IsSports = filter.IsSports,
             IsKids = filter.IsKids,
             IsNews = filter.IsNews,
-            IsSeries = filter.IsSeries
+            IsSeries = filter.IsSeries,
+            IsAnime = filter.IsAnime
         });
 
         var itemValuesQuery = context.ItemValues
@@ -1700,6 +1701,24 @@ public sealed class BaseItemRepository
         if (filter.IsSeries.HasValue)
         {
             baseQuery = baseQuery.Where(e => e.IsSeries == filter.IsSeries);
+        }
+
+        if (filter.IsAnime.HasValue)
+        {
+            const string animeCollectionName = "anime";
+
+            if (filter.IsAnime.Value)
+            {
+                baseQuery = baseQuery.Where(e =>
+                    e.TopParentId.HasValue
+                    && context.BaseItems.Any(f => f.Id == e.TopParentId.Value && f.Name != null && f.Name.ToLower() == animeCollectionName));
+            }
+            else
+            {
+                baseQuery = baseQuery.Where(e =>
+                    !e.TopParentId.HasValue
+                    || !context.BaseItems.Any(f => f.Id == e.TopParentId.Value && f.Name != null && f.Name.ToLower() == animeCollectionName));
+            }
         }
 
         if (filter.IsSports.HasValue)
@@ -2488,6 +2507,20 @@ public sealed class BaseItemRepository
             var seriesStatus = filter.SeriesStatuses.Select(e => e.ToString()).ToArray();
             baseQuery = baseQuery
                 .Where(e => seriesStatus.Any(f => e.Data!.Contains(f)));
+        }
+
+        if (filter.DubStatuses.Length > 0)
+        {
+            var dubStatuses = filter.DubStatuses.Select(e => e.ToString()).ToArray();
+            baseQuery = baseQuery
+                .Where(e => e.DubAvailable != null && dubStatuses.Any(f => f == e.DubAvailable));
+        }
+
+        if (filter.SubStatuses.Length > 0)
+        {
+            var subStatuses = filter.SubStatuses.Select(e => e.ToString()).ToArray();
+            baseQuery = baseQuery
+                .Where(e => e.SubAvailable != null && subStatuses.Any(f => f == e.SubAvailable));
         }
 
         if (filter.BoxSetLibraryFolders.Length > 0)
