@@ -90,6 +90,7 @@ namespace Jellyfin.Server
             serviceCollection.AddSingleton<IDeviceManager, DeviceManager>();
             serviceCollection.AddSingleton<ITrickplayManager, TrickplayManager>();
             serviceCollection.AddSingleton<IReleaseCalendarService, ReleaseCalendarService>();
+            serviceCollection.AddSingleton<MediaBrowser.Controller.Trending.ITrendingService, Emby.Server.Implementations.Trending.TrendingService>();
 
             // TODO search the assemblies instead of adding them manually?
             serviceCollection.AddSingleton<IWebSocketListener, SessionWebSocketListener>();

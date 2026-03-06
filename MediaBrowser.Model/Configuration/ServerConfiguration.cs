@@ -306,4 +306,9 @@ public class ServerConfiguration : BaseApplicationConfiguration
     /// Gets or sets the release calendar configuration for Radarr/Sonarr integration.
     /// </summary>
     public ReleaseCalendarConfiguration ReleaseCalendar { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the trending configuration for Trakt integration.
+    /// </summary>
+    public MediaBrowser.Model.Trending.TrendingConfiguration Trending { get; set; } = new();
 }
