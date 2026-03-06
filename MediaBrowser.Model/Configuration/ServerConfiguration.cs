@@ -5,6 +5,7 @@ using System;
 using MediaBrowser.Model.Announcements;
 using MediaBrowser.Model.Drawing;
 using MediaBrowser.Model.Dto;
+using MediaBrowser.Model.ReleaseCalendar;
 using MediaBrowser.Model.System;
 using MediaBrowser.Model.Updates;
 
@@ -295,4 +296,14 @@ public class ServerConfiguration : BaseApplicationConfiguration
     /// </summary>
     /// <value>Language codes.</value>
     public string[] DubbingLanguageCodes { get; set; } = new[] { "en", "eng", "en-us", "en-gb", "en-ca", "en-au", "en-in", "english" };
+
+    /// <summary>
+    /// Gets or sets the server announcements.
+    /// </summary>
+    public AnnouncementInfo[] Announcements { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the release calendar configuration for Radarr/Sonarr integration.
+    /// </summary>
+    public ReleaseCalendarConfiguration ReleaseCalendar { get; set; } = new();
 }

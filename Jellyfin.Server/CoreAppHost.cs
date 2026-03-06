@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Emby.Server.Implementations;
+using Emby.Server.Implementations.ReleaseCalendar;
 using Emby.Server.Implementations.Session;
 using Jellyfin.Api.WebSocketListeners;
 using Jellyfin.Database.Implementations;
@@ -24,6 +25,7 @@ using MediaBrowser.Controller.Events;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Lyrics;
 using MediaBrowser.Controller.Net;
+using MediaBrowser.Controller.ReleaseCalendar;
 using MediaBrowser.Controller.Security;
 using MediaBrowser.Controller.Trickplay;
 using MediaBrowser.Model.Activity;
@@ -87,6 +89,7 @@ namespace Jellyfin.Server
             serviceCollection.AddSingleton<IDisplayPreferencesManager, DisplayPreferencesManager>();
             serviceCollection.AddSingleton<IDeviceManager, DeviceManager>();
             serviceCollection.AddSingleton<ITrickplayManager, TrickplayManager>();
+            serviceCollection.AddSingleton<IReleaseCalendarService, ReleaseCalendarService>();
 
             // TODO search the assemblies instead of adding them manually?
             serviceCollection.AddSingleton<IWebSocketListener, SessionWebSocketListener>();
