@@ -5,6 +5,7 @@ using System;
 using MediaBrowser.Model.Announcements;
 using MediaBrowser.Model.Drawing;
 using MediaBrowser.Model.Dto;
+using MediaBrowser.Model.ReleaseCalendar;
 using MediaBrowser.Model.System;
 using MediaBrowser.Model.Updates;
 
@@ -299,5 +300,10 @@ public class ServerConfiguration : BaseApplicationConfiguration
     /// <summary>
     /// Gets or sets the server announcements.
     /// </summary>
-    public AnnouncementInfo[] Announcements { get; set; } = Array.Empty<AnnouncementInfo>();
+    public AnnouncementInfo[] Announcements { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the release calendar configuration for Radarr/Sonarr integration.
+    /// </summary>
+    public ReleaseCalendarConfiguration ReleaseCalendar { get; set; } = new();
 }
