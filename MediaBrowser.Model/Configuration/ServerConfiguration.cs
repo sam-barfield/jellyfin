@@ -2,6 +2,7 @@
 #pragma warning disable CA1819
 
 using System;
+using MediaBrowser.Model.Announcements;
 using MediaBrowser.Model.Drawing;
 using MediaBrowser.Model.Dto;
 using MediaBrowser.Model.System;
