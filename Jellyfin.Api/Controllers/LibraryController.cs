@@ -563,6 +563,262 @@ public class LibraryController : BaseJellyfinApiController
     }
 
     /// <summary>
+    /// Gets all libraries that have dub/sub scanning enabled.
+    /// </summary>
+    /// <param name="userId">Optional. Filter folder visibility for a specific user.</param>
+    /// <response code="200">Dub/sub-enabled libraries returned.</response>
+    /// <returns>List of dub/sub-enabled libraries with missing episode counts.</returns>
+    [HttpGet("Library/DubSub/EnabledLibraries")]
+    [Authorize(Policy = Policies.RequiresElevation)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public ActionResult<DubSubEnabledLibraryDto[]> GetDubSubEnabledLibraries([FromQuery] Guid? userId)
+    {
+        userId = RequestHelpers.GetUserId(User, userId);
+        var user = userId.IsNullOrEmpty()
+            ? null
+            : _userManager.GetUserById(userId.Value);
+
+        var libraries = _libraryManager.GetUserRootFolder().Children
+            .Concat(_libraryManager.RootFolder.VirtualChildren)
+            .Where(i => _libraryManager.GetLibraryOptions(i).Enabled)
+            .Where(i => _libraryManager.GetLibraryOptions(i).DubbingIconsEnabled is true)
+            .Where(i => user is null || i.IsVisible(user))
+            .OrderBy(i => i.SortName)
+            .ToList();
+
+        var result = libraries.Select(library => new DubSubEnabledLibraryDto
+        {
+            LibraryId = library.Id,
+            LibraryName = library.Name,
+            MissingDubEpisodeCount = CountMissingEpisodes(library.Id, user, forDub: true),
+            MissingSubEpisodeCount = CountMissingEpisodes(library.Id, user, forDub: false)
+        }).ToArray();
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Gets a missing dub/sub report for one dub/sub-enabled library.
+    /// </summary>
+    /// <param name="libraryId">The library id.</param>
+    /// <param name="userId">Optional. Filter folder visibility for a specific user.</param>
+    /// <param name="includeSeasons">Whether to include per-season rows.</param>
+    /// <param name="includeEpisodes">Whether to include missing episodes under each season.</param>
+    /// <response code="200">Report returned.</response>
+    /// <response code="404">Library not found.</response>
+    /// <returns>The missing dub/sub report.</returns>
+    [HttpGet("Library/DubSub/MissingReport")]
+    [Authorize(Policy = Policies.RequiresElevation)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public ActionResult<DubSubMissingLibraryReportDto> GetDubSubMissingReport(
+        [FromQuery, Required] Guid libraryId,
+        [FromQuery] Guid? userId,
+        [FromQuery] bool includeSeasons = true,
+        [FromQuery] bool includeEpisodes = false)
+    {
+        userId = RequestHelpers.GetUserId(User, userId);
+        var user = userId.IsNullOrEmpty()
+            ? null
+            : _userManager.GetUserById(userId.Value);
+
+        var library = _libraryManager.GetItemById<Folder>(libraryId, user);
+        if (library is null)
+        {
+            return NotFound();
+        }
+
+        var libraryOptions = _libraryManager.GetLibraryOptions(library);
+        if (!libraryOptions.Enabled || libraryOptions.DubbingIconsEnabled is not true)
+        {
+            return Ok(new DubSubMissingLibraryReportDto
+            {
+                LibraryId = library.Id,
+                LibraryName = library.Name
+            });
+        }
+
+        var report = new DubSubMissingLibraryReportDto
+        {
+            LibraryId = library.Id,
+            LibraryName = library.Name,
+            MissingDubEpisodeCount = 0,
+            MissingSubEpisodeCount = 0
+        };
+
+        var missingDubEpisodes = _libraryManager.GetItemList(new InternalItemsQuery(user)
+        {
+            ParentId = library.Id,
+            Recursive = true,
+            IsAnime = true,
+            IncludeItemTypes = new[] { BaseItemKind.Episode },
+            DubStatuses = new[] { DubAvailability.Missing }
+        }).OfType<Episode>().ToList();
+
+        var missingSubEpisodes = _libraryManager.GetItemList(new InternalItemsQuery(user)
+        {
+            ParentId = library.Id,
+            Recursive = true,
+            IsAnime = true,
+            IncludeItemTypes = new[] { BaseItemKind.Episode },
+            SubStatuses = new[] { DubAvailability.Missing }
+        }).OfType<Episode>().ToList();
+
+        report.MissingDubEpisodeCount = missingDubEpisodes.Count;
+        report.MissingSubEpisodeCount = missingSubEpisodes.Count;
+
+        var allMissingEpisodeById = new Dictionary<Guid, Episode>(missingDubEpisodes.Count + missingSubEpisodes.Count);
+        foreach (var episode in missingDubEpisodes)
+        {
+            allMissingEpisodeById[episode.Id] = episode;
+        }
+
+        foreach (var episode in missingSubEpisodes)
+        {
+            allMissingEpisodeById[episode.Id] = episode;
+        }
+
+        var seriesMissingDubCounts = missingDubEpisodes
+            .GroupBy(ep => ep.SeriesId)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var seriesMissingSubCounts = missingSubEpisodes
+            .GroupBy(ep => ep.SeriesId)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var seasonMissingDubCounts = missingDubEpisodes
+            .GroupBy(ep => ep.SeasonId)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var seasonMissingSubCounts = missingSubEpisodes
+            .GroupBy(ep => ep.SeasonId)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var missingSeriesIds = new HashSet<Guid>(seriesMissingDubCounts.Keys);
+        missingSeriesIds.UnionWith(seriesMissingSubCounts.Keys);
+
+        if (missingSeriesIds.Count == 0)
+        {
+            report.Series = Array.Empty<DubSubMissingSeriesReportDto>();
+            return Ok(report);
+        }
+
+        var missingSeasonIds = new HashSet<Guid>(seasonMissingDubCounts.Keys);
+        missingSeasonIds.UnionWith(seasonMissingSubCounts.Keys);
+
+        var missingEpisodesBySeasonId = includeEpisodes
+            ? allMissingEpisodeById.Values
+                .GroupBy(ep => ep.SeasonId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.OrderBy(ep => ep.ParentIndexNumber ?? int.MaxValue)
+                        .ThenBy(ep => ep.IndexNumber ?? int.MaxValue)
+                        .ThenBy(ep => ep.SortName)
+                        .Select(ep => new DubSubMissingEpisodeReportDto
+                        {
+                            EpisodeId = ep.Id,
+                            EpisodeName = ep.Name,
+                            SeasonNumber = ep.ParentIndexNumber,
+                            EpisodeNumber = ep.IndexNumber,
+                            DubAvailable = ep.DubAvailable,
+                            SubAvailable = ep.SubAvailable
+                        })
+                        .ToArray())
+            : new Dictionary<Guid, DubSubMissingEpisodeReportDto[]>();
+
+        var seasonsBySeriesId = includeSeasons
+            ? _libraryManager.GetItemList(new InternalItemsQuery(user)
+            {
+                ParentId = library.Id,
+                Recursive = true,
+                IsAnime = true,
+                ItemIds = missingSeasonIds.ToArray(),
+                IncludeItemTypes = new[] { BaseItemKind.Season },
+                OrderBy = new[] { (ItemSortBy.SortName, SortOrder.Ascending) }
+            }).OfType<Season>()
+                .GroupBy(s => s.SeriesId)
+                .ToDictionary(g => g.Key, g => g.ToList())
+            : new Dictionary<Guid, List<Season>>();
+
+        var series = _libraryManager.GetItemList(new InternalItemsQuery(user)
+        {
+            ParentId = library.Id,
+            Recursive = true,
+            IsAnime = true,
+            ItemIds = missingSeriesIds.ToArray(),
+            IncludeItemTypes = new[] { BaseItemKind.Series },
+            OrderBy = new[] { (ItemSortBy.SortName, SortOrder.Ascending) }
+        }).OfType<Series>().ToList();
+
+        var seriesResults = new List<DubSubMissingSeriesReportDto>();
+        foreach (var anime in series)
+        {
+            seriesMissingDubCounts.TryGetValue(anime.Id, out var missingDubCount);
+            seriesMissingSubCounts.TryGetValue(anime.Id, out var missingSubCount);
+
+            if (missingDubCount == 0 && missingSubCount == 0)
+            {
+                continue;
+            }
+
+            var seriesReport = new DubSubMissingSeriesReportDto
+            {
+                SeriesId = anime.Id,
+                SeriesName = anime.Name,
+                DubAvailable = anime.DubAvailable,
+                SubAvailable = anime.SubAvailable,
+                MissingDubEpisodeCount = missingDubCount,
+                MissingSubEpisodeCount = missingSubCount
+            };
+
+            if (includeSeasons)
+            {
+                seasonsBySeriesId.TryGetValue(anime.Id, out var seasons);
+                seasons ??= new List<Season>();
+
+                var seasonResults = new List<DubSubMissingSeasonReportDto>();
+                foreach (var season in seasons)
+                {
+                    seasonMissingDubCounts.TryGetValue(season.Id, out var seasonMissingDubCount);
+                    seasonMissingSubCounts.TryGetValue(season.Id, out var seasonMissingSubCount);
+
+                    if (seasonMissingDubCount == 0 && seasonMissingSubCount == 0)
+                    {
+                        continue;
+                    }
+
+                    var seasonReport = new DubSubMissingSeasonReportDto
+                    {
+                        SeasonId = season.Id,
+                        SeasonName = season.Name,
+                        SeasonNumber = season.IndexNumber,
+                        DubAvailable = season.DubAvailable,
+                        SubAvailable = season.SubAvailable,
+                        MissingDubEpisodeCount = seasonMissingDubCount,
+                        MissingSubEpisodeCount = seasonMissingSubCount
+                    };
+
+                    if (includeEpisodes)
+                    {
+                        seasonReport.Episodes = missingEpisodesBySeasonId.TryGetValue(season.Id, out var missingEpisodes)
+                            ? missingEpisodes
+                            : Array.Empty<DubSubMissingEpisodeReportDto>();
+                    }
+
+                    seasonResults.Add(seasonReport);
+                }
+
+                seriesReport.Seasons = seasonResults;
+            }
+
+            seriesResults.Add(seriesReport);
+        }
+
+        report.Series = seriesResults;
+        return Ok(report);
+    }
+
+    /// <summary>
     /// Reports that new episodes of a series have been added by an external source.
     /// </summary>
     /// <param name="tvdbId">The tvdbId.</param>
@@ -955,6 +1211,33 @@ public class LibraryController : BaseJellyfinApiController
 
         return _libraryManager.GetItemsResult(query).TotalRecordCount;
     }
+
+    private QueryResult<BaseItem> GetMissingEpisodesResult(Guid parentId, User? user, bool forDub)
+    {
+        var query = new InternalItemsQuery(user)
+        {
+            ParentId = parentId,
+            Recursive = true,
+            IsAnime = true,
+            IncludeItemTypes = new[] { BaseItemKind.Episode },
+            EnableTotalRecordCount = true,
+            Limit = 1
+        };
+
+        if (forDub)
+        {
+            query.DubStatuses = new[] { DubAvailability.Missing };
+        }
+        else
+        {
+            query.SubStatuses = new[] { DubAvailability.Missing };
+        }
+
+        return _libraryManager.GetItemsResult(query);
+    }
+
+    private int CountMissingEpisodes(Guid parentId, User? user, bool forDub)
+        => GetMissingEpisodesResult(parentId, user, forDub).TotalRecordCount;
 
     private BaseItem? TranslateParentItem(BaseItem item, User user)
     {

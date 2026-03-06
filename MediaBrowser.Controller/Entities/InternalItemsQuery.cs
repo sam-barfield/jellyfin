@@ -46,6 +46,8 @@ namespace MediaBrowser.Controller.Entities
             PersonTypes = Array.Empty<string>();
             PresetViews = Array.Empty<CollectionType?>();
             SeriesStatuses = Array.Empty<SeriesStatus>();
+            DubStatuses = Array.Empty<DubAvailability>();
+            SubStatuses = Array.Empty<DubAvailability>();
             SourceTypes = Array.Empty<SourceType>();
             StudioIds = Array.Empty<Guid>();
             Tags = Array.Empty<string>();
@@ -209,6 +211,8 @@ namespace MediaBrowser.Controller.Entities
 
         public bool? IsSeries { get; set; }
 
+        public bool? IsAnime { get; set; }
+
         public int? MinIndexNumber { get; set; }
 
         /// <summary>
@@ -258,6 +262,10 @@ namespace MediaBrowser.Controller.Entities
         public SourceType[] SourceTypes { get; set; }
 
         public SeriesStatus[] SeriesStatuses { get; set; }
+
+        public DubAvailability[] DubStatuses { get; set; }
+
+        public DubAvailability[] SubStatuses { get; set; }
 
         public string? ExternalSeriesId { get; set; }
 

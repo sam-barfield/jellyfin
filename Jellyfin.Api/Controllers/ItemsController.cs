@@ -99,6 +99,7 @@ public class ItemsController : BaseJellyfinApiController
     /// <param name="hasTvdbId">Optional filter by items that have a TVDb id or not.</param>
     /// <param name="isMovie">Optional filter for live tv movies.</param>
     /// <param name="isSeries">Optional filter for live tv series.</param>
+    /// <param name="isAnime">Optional filter for anime items.</param>
     /// <param name="isNews">Optional filter for live tv news.</param>
     /// <param name="isKids">Optional filter for live tv kids.</param>
     /// <param name="isSports">Optional filter for live tv sports.</param>
@@ -149,6 +150,8 @@ public class ItemsController : BaseJellyfinApiController
     /// <param name="maxHeight">Optional. Filter by the maximum height of the item.</param>
     /// <param name="is3D">Optional filter by items that are 3D, or not.</param>
     /// <param name="seriesStatus">Optional filter by Series Status. Allows multiple, comma delimited.</param>
+    /// <param name="dubStatuses">Optional filter by dub availability status. Allows multiple, comma delimited.</param>
+    /// <param name="subStatuses">Optional filter by subtitle availability status. Allows multiple, comma delimited.</param>
     /// <param name="nameStartsWithOrGreater">Optional filter by items whose name is sorted equally or greater than a given input string.</param>
     /// <param name="nameStartsWith">Optional filter by items whose name is sorted equally than a given input string.</param>
     /// <param name="nameLessThan">Optional filter by items whose name is equally or lesser than a given input string.</param>
@@ -189,6 +192,7 @@ public class ItemsController : BaseJellyfinApiController
         [FromQuery] bool? hasTvdbId,
         [FromQuery] bool? isMovie,
         [FromQuery] bool? isSeries,
+        [FromQuery] bool? isAnime,
         [FromQuery] bool? isNews,
         [FromQuery] bool? isKids,
         [FromQuery] bool? isSports,
@@ -239,6 +243,8 @@ public class ItemsController : BaseJellyfinApiController
         [FromQuery] int? maxHeight,
         [FromQuery] bool? is3D,
         [FromQuery, ModelBinder(typeof(CommaDelimitedCollectionModelBinder))] SeriesStatus[] seriesStatus,
+        [FromQuery, ModelBinder(typeof(CommaDelimitedCollectionModelBinder))] DubAvailability[] dubStatuses,
+        [FromQuery, ModelBinder(typeof(CommaDelimitedCollectionModelBinder))] DubAvailability[] subStatuses,
         [FromQuery] string? nameStartsWithOrGreater,
         [FromQuery] string? nameStartsWith,
         [FromQuery] string? nameLessThan,
@@ -338,6 +344,7 @@ public class ItemsController : BaseJellyfinApiController
                 HasTmdbId = hasTmdbId,
                 IsMovie = isMovie,
                 IsSeries = isSeries,
+                IsAnime = isAnime,
                 IsNews = isNews,
                 IsKids = isKids,
                 IsSports = isSports,
@@ -425,6 +432,16 @@ public class ItemsController : BaseJellyfinApiController
             if (seriesStatus.Length != 0)
             {
                 query.SeriesStatuses = seriesStatus;
+            }
+
+            if (dubStatuses.Length != 0)
+            {
+                query.DubStatuses = dubStatuses;
+            }
+
+            if (subStatuses.Length != 0)
+            {
+                query.SubStatuses = subStatuses;
             }
 
             // Exclude Blocked Unrated Items
@@ -565,6 +582,7 @@ public class ItemsController : BaseJellyfinApiController
     /// <param name="hasTvdbId">Optional filter by items that have a TVDb id or not.</param>
     /// <param name="isMovie">Optional filter for live tv movies.</param>
     /// <param name="isSeries">Optional filter for live tv series.</param>
+    /// <param name="isAnime">Optional filter for anime items.</param>
     /// <param name="isNews">Optional filter for live tv news.</param>
     /// <param name="isKids">Optional filter for live tv kids.</param>
     /// <param name="isSports">Optional filter for live tv sports.</param>
@@ -615,6 +633,8 @@ public class ItemsController : BaseJellyfinApiController
     /// <param name="maxHeight">Optional. Filter by the maximum height of the item.</param>
     /// <param name="is3D">Optional filter by items that are 3D, or not.</param>
     /// <param name="seriesStatus">Optional filter by Series Status. Allows multiple, comma delimited.</param>
+    /// <param name="dubStatuses">Optional filter by dub availability status. Allows multiple, comma delimited.</param>
+    /// <param name="subStatuses">Optional filter by subtitle availability status. Allows multiple, comma delimited.</param>
     /// <param name="nameStartsWithOrGreater">Optional filter by items whose name is sorted equally or greater than a given input string.</param>
     /// <param name="nameStartsWith">Optional filter by items whose name is sorted equally than a given input string.</param>
     /// <param name="nameLessThan">Optional filter by items whose name is equally or lesser than a given input string.</param>
@@ -656,6 +676,7 @@ public class ItemsController : BaseJellyfinApiController
         [FromQuery] bool? hasTvdbId,
         [FromQuery] bool? isMovie,
         [FromQuery] bool? isSeries,
+        [FromQuery] bool? isAnime,
         [FromQuery] bool? isNews,
         [FromQuery] bool? isKids,
         [FromQuery] bool? isSports,
@@ -706,6 +727,8 @@ public class ItemsController : BaseJellyfinApiController
         [FromQuery] int? maxHeight,
         [FromQuery] bool? is3D,
         [FromQuery, ModelBinder(typeof(CommaDelimitedCollectionModelBinder))] SeriesStatus[] seriesStatus,
+        [FromQuery, ModelBinder(typeof(CommaDelimitedCollectionModelBinder))] DubAvailability[] dubStatuses,
+        [FromQuery, ModelBinder(typeof(CommaDelimitedCollectionModelBinder))] DubAvailability[] subStatuses,
         [FromQuery] string? nameStartsWithOrGreater,
         [FromQuery] string? nameStartsWith,
         [FromQuery] string? nameLessThan,
@@ -743,6 +766,7 @@ public class ItemsController : BaseJellyfinApiController
             hasTvdbId,
             isMovie,
             isSeries,
+            isAnime,
             isNews,
             isKids,
             isSports,
@@ -793,6 +817,8 @@ public class ItemsController : BaseJellyfinApiController
             maxHeight,
             is3D,
             seriesStatus,
+            dubStatuses,
+            subStatuses,
             nameStartsWithOrGreater,
             nameStartsWith,
             nameLessThan,

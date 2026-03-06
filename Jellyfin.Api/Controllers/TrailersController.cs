@@ -59,6 +59,7 @@ public class TrailersController : BaseJellyfinApiController
     /// <param name="hasTvdbId">Optional filter by items that have a TVDb id or not.</param>
     /// <param name="isMovie">Optional filter for live tv movies.</param>
     /// <param name="isSeries">Optional filter for live tv series.</param>
+    /// <param name="isAnime">Optional filter for anime items.</param>
     /// <param name="isNews">Optional filter for live tv news.</param>
     /// <param name="isKids">Optional filter for live tv kids.</param>
     /// <param name="isSports">Optional filter for live tv sports.</param>
@@ -147,6 +148,7 @@ public class TrailersController : BaseJellyfinApiController
         [FromQuery] bool? hasTvdbId,
         [FromQuery] bool? isMovie,
         [FromQuery] bool? isSeries,
+        [FromQuery] bool? isAnime,
         [FromQuery] bool? isNews,
         [FromQuery] bool? isKids,
         [FromQuery] bool? isSports,
@@ -237,6 +239,7 @@ public class TrailersController : BaseJellyfinApiController
                 hasTvdbId,
                 isMovie,
                 isSeries,
+                isAnime,
                 isNews,
                 isKids,
                 isSports,
@@ -287,6 +290,8 @@ public class TrailersController : BaseJellyfinApiController
                 maxHeight,
                 is3D,
                 seriesStatus,
+                Array.Empty<DubAvailability>(),
+                Array.Empty<DubAvailability>(),
                 nameStartsWithOrGreater,
                 nameStartsWith,
                 nameLessThan,
