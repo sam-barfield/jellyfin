@@ -2,6 +2,7 @@
 #pragma warning disable CA1819
 
 using System;
+using MediaBrowser.Model.Announcements;
 using MediaBrowser.Model.Drawing;
 using MediaBrowser.Model.Dto;
 using MediaBrowser.Model.System;
@@ -294,4 +295,9 @@ public class ServerConfiguration : BaseApplicationConfiguration
     /// </summary>
     /// <value>Language codes.</value>
     public string[] DubbingLanguageCodes { get; set; } = new[] { "en", "eng", "en-us", "en-gb", "en-ca", "en-au", "en-in", "english" };
+
+    /// <summary>
+    /// Gets or sets the server announcements.
+    /// </summary>
+    public AnnouncementInfo[] Announcements { get; set; } = Array.Empty<AnnouncementInfo>();
 }
