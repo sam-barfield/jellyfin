@@ -921,6 +921,11 @@ namespace Emby.Server.Implementations.Dto
                 dto.CollectionType = hasCollectionType.CollectionType;
             }
 
+            if (item is Folder)
+            {
+                dto.DubbingEnabled = _libraryManager.GetLibraryOptions(item).DubbingIconsEnabled ?? false;
+            }
+
             if (options.ContainsField(ItemFields.RemoteTrailers))
             {
                 dto.RemoteTrailers = item.RemoteTrailers;

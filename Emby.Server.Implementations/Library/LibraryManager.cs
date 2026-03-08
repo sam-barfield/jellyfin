@@ -1327,6 +1327,7 @@ namespace Emby.Server.Implementations.Library
                 }
 
                 info.LibraryOptions = GetLibraryOptions(libraryFolder);
+                info.DubbingEnabled = info.LibraryOptions?.DubbingIconsEnabled ?? false;
 
                 if (refreshQueue is not null)
                 {

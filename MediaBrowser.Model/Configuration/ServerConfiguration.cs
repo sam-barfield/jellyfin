@@ -295,7 +295,7 @@ public class ServerConfiguration : BaseApplicationConfiguration
     /// Gets or sets language codes used to determine dubbed sources.
     /// </summary>
     /// <value>Language codes.</value>
-    public string[] DubbingLanguageCodes { get; set; } = new[] { "en", "eng", "en-us", "en-gb", "en-ca", "en-au", "en-in", "english" };
+    public string[] DubbingLanguageCodes { get; set; } = ["en", "eng", "en-us", "en-gb", "en-ca", "en-au", "en-in", "english"];
 
     /// <summary>
     /// Gets or sets the server announcements.

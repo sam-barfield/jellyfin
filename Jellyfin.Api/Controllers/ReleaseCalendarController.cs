@@ -16,25 +16,19 @@ namespace Jellyfin.Api.Controllers;
 /// <summary>
 /// Release calendar controller for Radarr/Sonarr integration.
 /// </summary>
+/// <remarks>
+/// Initializes a new instance of the <see cref="ReleaseCalendarController"/> class.
+/// </remarks>
+/// <param name="releaseCalendarService">Instance of the <see cref="IReleaseCalendarService"/>.</param>
+/// <param name="configurationManager">Instance of the <see cref="IServerConfigurationManager"/>.</param>
 [Route("ReleaseCalendar")]
 [Authorize]
-public class ReleaseCalendarController : BaseJellyfinApiController
+public class ReleaseCalendarController(
+    IReleaseCalendarService releaseCalendarService,
+    IServerConfigurationManager configurationManager) : BaseJellyfinApiController
 {
-    private readonly IReleaseCalendarService _releaseCalendarService;
-    private readonly IServerConfigurationManager _configurationManager;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ReleaseCalendarController"/> class.
-    /// </summary>
-    /// <param name="releaseCalendarService">Instance of the <see cref="IReleaseCalendarService"/>.</param>
-    /// <param name="configurationManager">Instance of the <see cref="IServerConfigurationManager"/>.</param>
-    public ReleaseCalendarController(
-        IReleaseCalendarService releaseCalendarService,
-        IServerConfigurationManager configurationManager)
-    {
-        _releaseCalendarService = releaseCalendarService;
-        _configurationManager = configurationManager;
-    }
+    private readonly IReleaseCalendarService _releaseCalendarService = releaseCalendarService;
+    private readonly IServerConfigurationManager _configurationManager = configurationManager;
 
     /// <summary>
     /// Gets the combined release calendar from Radarr and Sonarr.
