@@ -54,5 +54,7 @@ namespace MediaBrowser.Model.Entities
         public double? RefreshProgress { get; set; }
 
         public string RefreshStatus { get; set; }
+
+        public bool DubbingEnabled { get; set; }
     }
 }

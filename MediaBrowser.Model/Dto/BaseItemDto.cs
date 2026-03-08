@@ -811,5 +811,7 @@ namespace MediaBrowser.Model.Dto
         /// </summary>
         /// <value>The type.</value>
         public DubAvailability? SubAvailable { get; set; }
+
+        public bool DubbingEnabled { get; set; }
     }
 }
