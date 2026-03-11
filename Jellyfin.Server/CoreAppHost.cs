@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Emby.Server.Implementations;
+using Emby.Server.Implementations.Friends;
 using Emby.Server.Implementations.ReleaseCalendar;
 using Emby.Server.Implementations.Session;
 using Jellyfin.Api.WebSocketListeners;
@@ -22,6 +23,7 @@ using MediaBrowser.Controller.BaseItemManager;
 using MediaBrowser.Controller.Devices;
 using MediaBrowser.Controller.Drawing;
 using MediaBrowser.Controller.Events;
+using MediaBrowser.Controller.Friends;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Lyrics;
 using MediaBrowser.Controller.Net;
@@ -91,12 +93,14 @@ namespace Jellyfin.Server
             serviceCollection.AddSingleton<ITrickplayManager, TrickplayManager>();
             serviceCollection.AddSingleton<IReleaseCalendarService, ReleaseCalendarService>();
             serviceCollection.AddSingleton<MediaBrowser.Controller.Trending.ITrendingService, Emby.Server.Implementations.Trending.TrendingService>();
+            serviceCollection.AddSingleton<IFriendService, FriendService>();
 
             // TODO search the assemblies instead of adding them manually?
             serviceCollection.AddSingleton<IWebSocketListener, SessionWebSocketListener>();
             serviceCollection.AddSingleton<IWebSocketListener, ActivityLogWebSocketListener>();
             serviceCollection.AddSingleton<IWebSocketListener, ScheduledTasksWebSocketListener>();
             serviceCollection.AddSingleton<IWebSocketListener, SessionInfoWebSocketListener>();
+            serviceCollection.AddSingleton<IWebSocketListener, FriendActivityWebSocketListener>();
 
             serviceCollection.AddSingleton<IAuthorizationContext, AuthorizationContext>();
 
