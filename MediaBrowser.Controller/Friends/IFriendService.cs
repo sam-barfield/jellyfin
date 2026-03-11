@@ -72,4 +72,14 @@ public interface IFriendService
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A <see cref="FriendWidgetDto"/>.</returns>
     Task<FriendWidgetDto> GetFriendWidgetAsync(Guid userId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Directly creates an accepted friendship between two users, bypassing the request flow.
+    /// Intended for administrator use only.
+    /// </summary>
+    /// <param name="userId">The id of the first user.</param>
+    /// <param name="friendId">The id of the second user.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    Task AddFriendshipAsync(Guid userId, Guid friendId, CancellationToken cancellationToken);
 }

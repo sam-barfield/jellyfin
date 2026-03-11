@@ -296,6 +296,55 @@ public class FriendService(
         };
     }
 
+    /// <inheritdoc />
+    public async Task AddFriendshipAsync(Guid userId, Guid friendId, CancellationToken cancellationToken)
+    {
+        if (userId.Equals(friendId))
+        {
+            throw new InvalidOperationException("A user cannot be friends with themselves.");
+        }
+
+        await using var dbContext = await _dbProvider.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
+
+        var existing = await dbContext.FriendRequests
+            .FirstOrDefaultAsync(
+                fr => (fr.RequesterId.Equals(userId) && fr.AddresseeId.Equals(friendId))
+                   || (fr.RequesterId.Equals(friendId) && fr.AddresseeId.Equals(userId)),
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        if (existing is not null)
+        {
+            if (existing.Status == FriendRequestStatus.Accepted)
+            {
+                throw new InvalidOperationException("These users are already friends.");
+            }
+
+            // Upgrade a pending request to accepted
+            existing.Status = FriendRequestStatus.Accepted;
+            existing.UpdatedAt = DateTime.UtcNow;
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            _logger.LogInformation("Admin upgraded pending request to accepted friendship between {UserId} and {FriendId}", userId, friendId);
+            return;
+        }
+
+        var now = DateTime.UtcNow;
+        var friendship = new FriendRequest
+        {
+            Id = Guid.NewGuid(),
+            RequesterId = userId,
+            AddresseeId = friendId,
+            Status = FriendRequestStatus.Accepted,
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+
+        dbContext.FriendRequests.Add(friendship);
+        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        _logger.LogInformation("Admin created friendship between {UserId} and {FriendId}", userId, friendId);
+    }
+
     private async Task<FriendDto> BuildFriendDtoAsync(
         User friendUser,
         List<SessionInfo> activeSessions,

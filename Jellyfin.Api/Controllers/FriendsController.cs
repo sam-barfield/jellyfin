@@ -188,4 +188,75 @@ public class FriendsController(IFriendService friendService, ILogger<FriendsCont
             return NotFound(ex.Message);
         }
     }
+
+    // ── Admin endpoints ────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Gets the friend list for any user. Administrator only.
+    /// </summary>
+    /// <param name="userId">The id of the target user.</param>
+    /// <response code="200">Friend list returned.</response>
+    /// <returns>A list of friends.</returns>
+    [HttpGet("Admin/{userId:guid}")]
+    [Authorize(Policy = Policies.RequiresElevation)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<FriendDto>>> AdminGetUserFriends([FromRoute, Required] Guid userId)
+    {
+        var friends = await _friendService.GetFriendsAsync(userId, CancellationToken.None).ConfigureAwait(false);
+        return Ok(friends);
+    }
+
+    /// <summary>
+    /// Directly adds a friendship between two users. Administrator only.
+    /// </summary>
+    /// <param name="userId">The id of the first user.</param>
+    /// <param name="friendId">The id of the second user.</param>
+    /// <response code="204">Friendship created.</response>
+    /// <response code="400">Users are already friends or the request is invalid.</response>
+    /// <returns>No content.</returns>
+    [HttpPost("Admin/{userId:guid}/{friendId:guid}")]
+    [Authorize(Policy = Policies.RequiresElevation)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> AdminAddFriendship(
+        [FromRoute, Required] Guid userId,
+        [FromRoute, Required] Guid friendId)
+    {
+        try
+        {
+            await _friendService.AddFriendshipAsync(userId, friendId, CancellationToken.None).ConfigureAwait(false);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Removes a friendship between two users. Administrator only.
+    /// </summary>
+    /// <param name="userId">The id of the first user.</param>
+    /// <param name="friendId">The id of the second user (the friend to remove).</param>
+    /// <response code="204">Friendship removed.</response>
+    /// <response code="404">Friendship not found.</response>
+    /// <returns>No content.</returns>
+    [HttpDelete("Admin/{userId:guid}/{friendId:guid}")]
+    [Authorize(Policy = Policies.RequiresElevation)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> AdminRemoveFriendship(
+        [FromRoute, Required] Guid userId,
+        [FromRoute, Required] Guid friendId)
+    {
+        try
+        {
+            await _friendService.RemoveFriendAsync(userId, friendId, CancellationToken.None).ConfigureAwait(false);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
 }
