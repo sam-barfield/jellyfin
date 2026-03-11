@@ -36,6 +36,7 @@ namespace MediaBrowser.Model.Session
         ActivityLogEntry,
         ScheduledTasksInfo,
         FriendActivity,
+        UserNotification,
 
         // Client -> Server
         ActivityLogEntryStart,
@@ -46,6 +47,8 @@ namespace MediaBrowser.Model.Session
         ScheduledTasksInfoStop,
         FriendActivityStart,
         FriendActivityStop,
+        UserNotificationStart,
+        UserNotificationStop,
 
         // Shared
         KeepAlive,
