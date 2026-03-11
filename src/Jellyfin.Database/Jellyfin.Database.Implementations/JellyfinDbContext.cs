@@ -89,6 +89,11 @@ public class JellyfinDbContext(DbContextOptions<JellyfinDbContext> options, ILog
     public DbSet<FriendRequest> FriendRequests => Set<FriendRequest>();
 
     /// <summary>
+    /// Gets the <see cref="DbSet{TEntity}"/> containing the user notifications.
+    /// </summary>
+    public DbSet<UserNotification> UserNotifications => Set<UserNotification>();
+
+    /// <summary>
     /// Gets the <see cref="DbSet{TEntity}"/> containing the trickplay metadata.
     /// </summary>
     public DbSet<TrickplayInfo> TrickplayInfos => Set<TrickplayInfo>();

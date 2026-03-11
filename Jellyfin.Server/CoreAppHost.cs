@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Emby.Server.Implementations;
 using Emby.Server.Implementations.Friends;
+using Emby.Server.Implementations.Notifications;
 using Emby.Server.Implementations.ReleaseCalendar;
 using Emby.Server.Implementations.Session;
 using Jellyfin.Api.WebSocketListeners;
@@ -27,6 +28,7 @@ using MediaBrowser.Controller.Friends;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Lyrics;
 using MediaBrowser.Controller.Net;
+using MediaBrowser.Controller.Notifications;
 using MediaBrowser.Controller.ReleaseCalendar;
 using MediaBrowser.Controller.Security;
 using MediaBrowser.Controller.Trickplay;
@@ -94,6 +96,7 @@ namespace Jellyfin.Server
             serviceCollection.AddSingleton<IReleaseCalendarService, ReleaseCalendarService>();
             serviceCollection.AddSingleton<MediaBrowser.Controller.Trending.ITrendingService, Emby.Server.Implementations.Trending.TrendingService>();
             serviceCollection.AddSingleton<IFriendService, FriendService>();
+            serviceCollection.AddSingleton<IUserNotificationService, UserNotificationService>();
 
             // TODO search the assemblies instead of adding them manually?
             serviceCollection.AddSingleton<IWebSocketListener, SessionWebSocketListener>();
@@ -101,6 +104,7 @@ namespace Jellyfin.Server
             serviceCollection.AddSingleton<IWebSocketListener, ScheduledTasksWebSocketListener>();
             serviceCollection.AddSingleton<IWebSocketListener, SessionInfoWebSocketListener>();
             serviceCollection.AddSingleton<IWebSocketListener, FriendActivityWebSocketListener>();
+            serviceCollection.AddSingleton<IWebSocketListener, UserNotificationWebSocketListener>();
 
             serviceCollection.AddSingleton<IAuthorizationContext, AuthorizationContext>();
 

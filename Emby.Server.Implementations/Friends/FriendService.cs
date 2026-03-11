@@ -8,6 +8,7 @@ using Jellyfin.Database.Implementations.Entities;
 using Jellyfin.Database.Implementations.Enums;
 using MediaBrowser.Controller.Friends;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Controller.Notifications;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Friends;
 using Microsoft.EntityFrameworkCore;
@@ -24,11 +25,13 @@ namespace Emby.Server.Implementations.Friends;
 /// <param name="dbProvider">The database context factory.</param>
 /// <param name="userManager">The user manager.</param>
 /// <param name="sessionManager">The session manager.</param>
+/// <param name="notificationService">The user notification service.</param>
 /// <param name="logger">The logger.</param>
 public class FriendService(
     IDbContextFactory<JellyfinDbContext> dbProvider,
     IUserManager userManager,
     ISessionManager sessionManager,
+    IUserNotificationService notificationService,
     ILogger<FriendService> logger) : IFriendService
 {
     private const long TicksPerHour = 36_000_000_000L;
@@ -36,6 +39,7 @@ public class FriendService(
     private readonly IDbContextFactory<JellyfinDbContext> _dbProvider = dbProvider;
     private readonly IUserManager _userManager = userManager;
     private readonly ISessionManager _sessionManager = sessionManager;
+    private readonly IUserNotificationService _notificationService = notificationService;
     private readonly ILogger<FriendService> _logger = logger;
 
     /// <inheritdoc />
@@ -84,6 +88,9 @@ public class FriendService(
 
         _logger.LogInformation("User {RequesterId} sent a friend request to {AddresseeId}", requesterId, addresseeId);
 
+        var requestData = System.Text.Json.JsonSerializer.Serialize(new { userId = requesterId, username = requester.Username });
+        await _notificationService.CreateNotificationAsync(addresseeId, Jellyfin.Database.Implementations.Enums.NotificationType.FriendRequestReceived, requestData, cancellationToken).ConfigureAwait(false);
+
         return new FriendRequestDto
         {
             RequestId = request.Id,
@@ -119,6 +126,20 @@ public class FriendService(
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         _logger.LogInformation("User {AddresseeId} accepted friend request {RequestId}", addresseeId, requestId);
+
+        // Notify both parties that they are now friends.
+        var requesterId = request.RequesterId;
+        var requester = _userManager.GetUserById(requesterId);
+        var addressee = _userManager.GetUserById(addresseeId);
+
+        if (requester is not null && addressee is not null)
+        {
+            var requesterData = System.Text.Json.JsonSerializer.Serialize(new { userId = addresseeId, username = addressee.Username });
+            var addresseeData = System.Text.Json.JsonSerializer.Serialize(new { userId = requesterId, username = requester.Username });
+
+            await _notificationService.CreateNotificationAsync(requesterId, Jellyfin.Database.Implementations.Enums.NotificationType.FriendRequestAccepted, requesterData, cancellationToken).ConfigureAwait(false);
+            await _notificationService.CreateNotificationAsync(addresseeId, Jellyfin.Database.Implementations.Enums.NotificationType.FriendRequestAccepted, addresseeData, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     /// <inheritdoc />
@@ -165,6 +186,13 @@ public class FriendService(
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         _logger.LogInformation("User {UserId} removed friend {FriendId}", userId, friendId);
+
+        var remover = _userManager.GetUserById(userId);
+        if (remover is not null)
+        {
+            var removeData = System.Text.Json.JsonSerializer.Serialize(new { userId, username = remover.Username });
+            await _notificationService.CreateNotificationAsync(friendId, Jellyfin.Database.Implementations.Enums.NotificationType.FriendRemoved, removeData, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     /// <inheritdoc />
