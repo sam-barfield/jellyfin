@@ -44,7 +44,7 @@ public class FriendsController(IFriendService friendService, ILogger<FriendsCont
     }
 
     /// <summary>
-    /// Gets all pending incoming friend requests for the current user.
+    /// Gets all pending incoming and outgoing friend requests for the current user.
     /// </summary>
     /// <response code="200">Pending requests returned.</response>
     /// <returns>A list of pending friend requests.</returns>

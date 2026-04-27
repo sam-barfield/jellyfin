@@ -3,7 +3,7 @@ using System;
 namespace MediaBrowser.Model.Friends;
 
 /// <summary>
-/// Represents a pending incoming friend request.
+/// Represents a pending friend request.
 /// </summary>
 public class FriendRequestDto
 {
@@ -21,6 +21,16 @@ public class FriendRequestDto
     /// Gets or sets the username of the user who sent the request.
     /// </summary>
     public string RequesterName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the id of the user receiving the request.
+    /// </summary>
+    public Guid AddresseeId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the username of the user receiving the request.
+    /// </summary>
+    public string AddresseeName { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the date and time the request was created.

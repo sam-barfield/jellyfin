@@ -57,7 +57,7 @@ public interface IFriendService
     Task<IReadOnlyList<FriendDto>> GetFriendsAsync(Guid userId, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Gets all pending incoming friend requests for the specified user.
+    /// Gets all pending incoming and outgoing friend requests for the specified user.
     /// </summary>
     /// <param name="userId">The user's id.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
