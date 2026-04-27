@@ -96,6 +96,8 @@ public class FriendService(
             RequestId = request.Id,
             RequesterId = requesterId,
             RequesterName = requester.Username,
+            AddresseeId = addresseeId,
+            AddresseeName = addressee.Username,
             CreatedAt = request.CreatedAt
         };
     }
@@ -231,7 +233,7 @@ public class FriendService(
         await using var dbContext = await _dbProvider.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
 
         var requests = await dbContext.FriendRequests
-            .Where(fr => fr.AddresseeId.Equals(userId) && fr.Status == FriendRequestStatus.Pending)
+            .Where(fr => (fr.AddresseeId.Equals(userId) || fr.RequesterId.Equals(userId)) && fr.Status == FriendRequestStatus.Pending)
             .OrderBy(fr => fr.CreatedAt)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -240,11 +242,14 @@ public class FriendService(
         foreach (var req in requests)
         {
             var requester = _userManager.GetUserById(req.RequesterId);
+            var addressee = _userManager.GetUserById(req.AddresseeId);
             results.Add(new FriendRequestDto
             {
                 RequestId = req.Id,
                 RequesterId = req.RequesterId,
                 RequesterName = requester?.Username ?? string.Empty,
+                AddresseeId = req.AddresseeId,
+                AddresseeName = addressee?.Username ?? string.Empty,
                 CreatedAt = req.CreatedAt
             });
         }
