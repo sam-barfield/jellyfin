@@ -434,6 +434,7 @@ namespace Jellyfin.Server.Implementations.Users
                     AudioLanguagePreference = user.AudioLanguagePreference,
                     RememberAudioSelections = user.RememberAudioSelections,
                     EnableNextEpisodeAutoPlay = user.EnableNextEpisodeAutoPlay,
+                    EnablePrivateMode = user.EnablePrivateMode,
                     RememberSubtitleSelections = user.RememberSubtitleSelections,
                     SubtitleLanguagePreference = user.SubtitleLanguagePreference ?? string.Empty,
                     OrderedViews = user.GetPreferenceValues<Guid>(PreferenceKind.OrderedViews),
@@ -617,12 +618,24 @@ namespace Jellyfin.Server.Implementations.Users
                     if (isUserSession)
                     {
                         var date = DateTime.UtcNow;
-                        await dbContext.Users
+                        if (user.EnablePrviateMode)
+                        {
+                            await dbContext.Users
+                            .Where(e => e.Id == user.Id)
+                            .ExecuteUpdateAsync(e => e
+
+                                .SetProperty(f => f.LastLoginDate, date))
+                            .ConfigureAwait(false);
+                        } else
+                        {
+                            await dbContext.Users
                             .Where(e => e.Id == user.Id)
                             .ExecuteUpdateAsync(e => e
                                 .SetProperty(f => f.LastActivityDate, date)
                                 .SetProperty(f => f.LastLoginDate, date))
                             .ConfigureAwait(false);
+                        }
+
                     }
 
                     await dbContext.Users
@@ -778,6 +791,7 @@ namespace Jellyfin.Server.Implementations.Users
                     user.AudioLanguagePreference = config.AudioLanguagePreference;
                     user.RememberAudioSelections = config.RememberAudioSelections;
                     user.EnableNextEpisodeAutoPlay = config.EnableNextEpisodeAutoPlay;
+                    user.EnablePrivateMode = config.EnablePrivateMode;
                     user.RememberSubtitleSelections = config.RememberSubtitleSelections;
                     user.SubtitleLanguagePreference = config.SubtitleLanguagePreference;
 

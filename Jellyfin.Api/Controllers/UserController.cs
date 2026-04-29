@@ -530,6 +530,46 @@ public class UserController : BaseJellyfinApiController
         => UpdateUserConfiguration(userId, userConfig);
 
     /// <summary>
+    /// Toggles the user's private mode.
+    /// </summary>
+    /// <param name="userId">The user id.</param>
+    /// <param name="enablePrivateMode">Whether to enable private mode.</param>
+    /// <response code="204">Private mode toggled.</response>
+    /// <response code="403">User configuration update forbidden.</response>
+    /// <response code="404">User not found.</response>
+    /// <returns>A <see cref="NoContentResult"/> indicating success.</returns>
+    [HttpPost("PrivateMode")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> TogglePrivateMode(
+        [FromQuery] Guid? userId,
+        [FromQuery, Required] bool enablePrivateMode)
+    {
+        var requestUserId = userId ?? User.GetUserId();
+        var user = _userManager.GetUserById(requestUserId);
+        if (user is null)
+        {
+            return NotFound();
+        }
+
+        if (!RequestHelpers.AssertCanUpdateUser(User, user, true))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User configuration update not allowed");
+        }
+
+        var userConfig = _userManager.GetUserDto(user).Configuration;
+        if (userConfig is not null && userConfig.EnablePrivateMode != enablePrivateMode)
+        {
+            userConfig.EnablePrivateMode = enablePrivateMode;
+            await _userManager.UpdateConfigurationAsync(requestUserId, userConfig).ConfigureAwait(false);
+        }
+
+        return NoContent();
+    }
+
+    /// <summary>
     /// Creates a user.
     /// </summary>
     /// <param name="request">The create user by name request body.</param>

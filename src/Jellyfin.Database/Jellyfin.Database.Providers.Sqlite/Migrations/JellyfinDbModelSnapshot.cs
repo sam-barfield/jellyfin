@@ -1311,6 +1311,9 @@ namespace Jellyfin.Server.Implementations.Migrations
                     b.Property<bool>("EnableNextEpisodeAutoPlay")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("EnablePrivateMode")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("EnableUserPreferenceAccess")
                         .HasColumnType("INTEGER");
 

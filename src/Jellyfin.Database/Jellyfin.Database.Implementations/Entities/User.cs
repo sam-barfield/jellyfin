@@ -54,6 +54,7 @@ namespace Jellyfin.Database.Implementations.Entities
             PlayDefaultAudioTrack = true;
             SubtitleMode = SubtitlePlaybackMode.Default;
             SyncPlayAccess = SyncPlayUserAccessType.CreateAndJoinGroups;
+            EnablePrivateMode = false;
         }
 
         /// <summary>
@@ -249,6 +250,11 @@ namespace Jellyfin.Database.Implementations.Entities
         /// Required.
         /// </remarks>
         public bool EnableAutoLogin { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the user is in private mode.
+        /// </summary>
+        public bool EnablePrivateMode { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the user can change their preferences.
