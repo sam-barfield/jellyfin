@@ -70,6 +70,8 @@ namespace MediaBrowser.Model.Configuration
 
         public bool EnableNextEpisodeAutoPlay { get; set; }
 
+        public bool EnablePrivateMode { get; set; }
+
         /// <summary>
         /// Gets or sets the id of the selected cast receiver.
         /// </summary>

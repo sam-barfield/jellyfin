@@ -264,7 +264,7 @@ namespace Emby.Server.Implementations.Session
             {
                 var userLastActivityDate = user.LastActivityDate ?? DateTime.MinValue;
 
-                if ((activityDate - userLastActivityDate).TotalSeconds > 60)
+                if (!user.EnablePrivateMode && (activityDate - userLastActivityDate).TotalSeconds > 60)
                 {
                     try
                     {

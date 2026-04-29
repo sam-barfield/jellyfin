@@ -350,12 +350,27 @@ public class FriendService(
         _logger.LogInformation("Admin created friendship between {UserId} and {FriendId}", userId, friendId);
     }
 
-    private async Task<FriendDto> BuildFriendDtoAsync(
+    private static async Task<FriendDto> BuildFriendDtoAsync(
         User friendUser,
         List<SessionInfo> activeSessions,
         JellyfinDbContext dbContext,
         CancellationToken cancellationToken)
     {
+        if (friendUser.EnablePrivateMode)
+        {
+            var hoursWatchedIfPrivate = await GetHoursWatchedLastMonthAsync(friendUser.Id, dbContext, cancellationToken).ConfigureAwait(false);
+            return new FriendDto
+            {
+                UserId = friendUser.Id,
+                Username = friendUser.Username,
+                LastOnline = friendUser.LastActivityDate,
+                IsOnline = false,
+                NowPlaying = null,
+                HoursWatchedLastMonth = hoursWatchedIfPrivate,
+                HasProfileImage = friendUser.ProfileImage is not null
+            };
+        }
+
         // Find the most recent active session for this friend
         var session = activeSessions
             .Where(s => s.UserId.Equals(friendUser.Id))

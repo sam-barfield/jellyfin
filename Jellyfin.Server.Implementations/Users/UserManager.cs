@@ -330,6 +330,7 @@ namespace Jellyfin.Server.Implementations.Users
                     AudioLanguagePreference = user.AudioLanguagePreference,
                     RememberAudioSelections = user.RememberAudioSelections,
                     EnableNextEpisodeAutoPlay = user.EnableNextEpisodeAutoPlay,
+                    EnablePrivateMode = user.EnablePrivateMode,
                     RememberSubtitleSelections = user.RememberSubtitleSelections,
                     SubtitleLanguagePreference = user.SubtitleLanguagePreference ?? string.Empty,
                     OrderedViews = user.GetPreferenceValues<Guid>(PreferenceKind.OrderedViews),
@@ -485,7 +486,11 @@ namespace Jellyfin.Server.Implementations.Users
             {
                 if (isUserSession)
                 {
-                    user.LastActivityDate = user.LastLoginDate = DateTime.UtcNow;
+                    user.LastLoginDate = DateTime.UtcNow;
+                    if (!user.EnablePrivateMode)
+                    {
+                        user.LastActivityDate = DateTime.UtcNow;
+                    }
                 }
 
                 user.InvalidLoginAttemptCount = 0;
@@ -622,6 +627,7 @@ namespace Jellyfin.Server.Implementations.Users
                 user.AudioLanguagePreference = config.AudioLanguagePreference;
                 user.RememberAudioSelections = config.RememberAudioSelections;
                 user.EnableNextEpisodeAutoPlay = config.EnableNextEpisodeAutoPlay;
+                user.EnablePrivateMode = config.EnablePrivateMode;
                 user.RememberSubtitleSelections = config.RememberSubtitleSelections;
                 user.SubtitleLanguagePreference = config.SubtitleLanguagePreference;
 
