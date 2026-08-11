@@ -21,13 +21,11 @@ namespace Jellyfin.Api.Controllers;
 /// Initializes a new instance of the <see cref="FriendsController"/> class.
 /// </remarks>
 /// <param name="friendService">Instance of the <see cref="IFriendService"/>.</param>
-/// <param name="logger">Instance of the <see cref="ILogger{FriendsController}"/>.</param>
 [Route("Friends")]
 [Authorize]
-public class FriendsController(IFriendService friendService, ILogger<FriendsController> logger) : BaseJellyfinApiController
+public class FriendsController(IFriendService friendService) : BaseJellyfinApiController
 {
     private readonly IFriendService _friendService = friendService;
-    private readonly ILogger<FriendsController> _logger = logger;
 
     /// <summary>
     /// Gets the current user's friend list with online status and activity.

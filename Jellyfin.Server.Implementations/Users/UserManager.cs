@@ -618,7 +618,7 @@ namespace Jellyfin.Server.Implementations.Users
                     if (isUserSession)
                     {
                         var date = DateTime.UtcNow;
-                        if (user.EnablePrviateMode)
+                        if (user.EnablePrivateMode)
                         {
                             await dbContext.Users
                             .Where(e => e.Id == user.Id)
@@ -626,7 +626,8 @@ namespace Jellyfin.Server.Implementations.Users
 
                                 .SetProperty(f => f.LastLoginDate, date))
                             .ConfigureAwait(false);
-                        } else
+                        }
+                        else
                         {
                             await dbContext.Users
                             .Where(e => e.Id == user.Id)
@@ -635,7 +636,6 @@ namespace Jellyfin.Server.Implementations.Users
                                 .SetProperty(f => f.LastLoginDate, date))
                             .ConfigureAwait(false);
                         }
-
                     }
 
                     await dbContext.Users
