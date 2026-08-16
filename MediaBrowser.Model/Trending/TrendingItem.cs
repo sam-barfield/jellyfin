@@ -3,12 +3,12 @@ using System;
 namespace MediaBrowser.Model.Trending;
 
 /// <summary>
-/// A trending item from Trakt, mapped to a local Jellyfin item if available.
+/// A trending item from TMDB, mapped to a local Jellyfin item if available.
 /// </summary>
 public class TrendingItem
 {
     /// <summary>
-    /// Gets or sets the Trakt ranking.
+    /// Gets or sets the TMDB ranking.
     /// </summary>
     public int Rank { get; set; }
 
@@ -31,11 +31,6 @@ public class TrendingItem
     /// Gets or sets the TMDB identifier.
     /// </summary>
     public string? TmdbId { get; set; }
-
-    /// <summary>
-    /// Gets or sets the IMDB identifier.
-    /// </summary>
-    public string? ImdbId { get; set; }
 
     /// <summary>
     /// Gets or sets the internal base item id if present on the server.

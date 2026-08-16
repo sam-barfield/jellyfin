@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Jellyfin.Api.Controllers;
 
 /// <summary>
-/// Trending controller for Trakt integration.
+/// Trending controller for TMDB integration.
 /// </summary>
 [Route("Trending")]
 [Authorize]
