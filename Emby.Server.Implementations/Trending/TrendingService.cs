@@ -22,12 +22,12 @@ using Microsoft.Extensions.Logging;
 namespace Emby.Server.Implementations.Trending;
 
 /// <summary>
-/// Provides access to trending movies and series from Trakt.
+/// Provides access to trending movies and series from TMDB.
 /// </summary>
 public class TrendingService : ITrendingService
 {
     private const string CacheKeyPrefix = "Trending_";
-    private const string TraktApiUrl = "https://api.trakt.tv";
+    private const string TMDBApiUrl = "https://api.themoviedb.org/3/";
 
     private static readonly JsonSerializerOptions _jsonOptions = new()
     {
@@ -115,7 +115,7 @@ public class TrendingService : ITrendingService
 
     private async Task<IReadOnlyList<TrendingItem>> FetchTrendingMoviesAsync(TrendingConfiguration config, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(config.TraktClientId))
+        if (string.IsNullOrWhiteSpace(config.TMDBAccessToken))
         {
             return [];
         }
@@ -123,37 +123,41 @@ public class TrendingService : ITrendingService
         try
         {
             var client = _httpClientFactory.CreateClient(NamedClient.Default);
-            var url = $"{TraktApiUrl}/movies/trending?limit=100";
+            var url = $"{TMDBApiUrl}trending/movie/week?page=";
+            List<TMDBMovie> tmdbMovies = [];
 
-            using var request = new HttpRequestMessage(HttpMethod.Get, url);
-            request.Headers.Add("trakt-api-version", "2");
-            request.Headers.Add("trakt-api-key", config.TraktClientId);
+            for (int i = 1; i <= 5; i++)
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Get, url + i.ToString(CultureInfo.InvariantCulture));
+                request.Headers.Add("accept", "application/json");
+                request.Headers.Add("User-Agent", "Jellyfin");
+                request.Headers.Add("Authorization", "Bearer " + config.TMDBAccessToken);
 
-            using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
+                using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
 
-            var traktMovies = await response.Content.ReadFromJsonAsync<List<TraktTrendingMovieResponse>>(_jsonOptions, cancellationToken).ConfigureAwait(false);
-            if (traktMovies is null)
+                var jsonResponse = await response.Content.ReadFromJsonAsync<TMDBTrendingMovieResponse>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+                if (jsonResponse is not null)
+                {
+                    tmdbMovies.AddRange(jsonResponse.Results ?? []);
+                }
+            }
+
+            if (tmdbMovies is null)
             {
                 return [];
             }
 
             var results = new List<TrendingItem>();
             int rank = 1;
-            foreach (var m in traktMovies)
+            foreach (var movie in tmdbMovies)
             {
                 if (rank > 10)
                 {
                     break;
                 }
 
-                var movie = m.Movie;
-                if (movie?.Ids is null)
-                {
-                    continue;
-                }
-
-                var localItem = FindLocalItem(movie.Ids, new[] { BaseItemKind.Movie });
+                var localItem = FindLocalItem(movie.Id, new[] { BaseItemKind.Movie });
                 if (localItem is not null)
                 {
                     results.Add(new TrendingItem
@@ -161,9 +165,8 @@ public class TrendingService : ITrendingService
                         Rank = rank,
                         Title = localItem.Name ?? movie.Title ?? string.Empty,
                         Overview = localItem.Overview ?? movie.Overview ?? string.Empty,
-                        Year = localItem.ProductionYear ?? movie.Year,
-                        TmdbId = movie.Ids.Tmdb?.ToString(CultureInfo.InvariantCulture),
-                        ImdbId = movie.Ids.Imdb,
+                        Year = localItem.ProductionYear ?? DateTime.ParseExact(movie.Release_Date ?? "1970-01-01", "yyyy-MM-dd", CultureInfo.InvariantCulture).Year,
+                        TmdbId = movie.Id.ToString(CultureInfo.InvariantCulture),
                         JellyfinItemId = localItem.Id
                     });
                     rank++;
@@ -174,14 +177,14 @@ public class TrendingService : ITrendingService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to fetch trending movies from Trakt");
+            _logger.LogWarning(ex, "Failed to fetch trending movies from TMDB");
             return [];
         }
     }
 
     private async Task<IReadOnlyList<TrendingItem>> FetchTrendingShowsAsync(TrendingConfiguration config, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(config.TraktClientId))
+        if (string.IsNullOrWhiteSpace(config.TMDBAccessToken))
         {
             return [];
         }
@@ -189,37 +192,41 @@ public class TrendingService : ITrendingService
         try
         {
             var client = _httpClientFactory.CreateClient(NamedClient.Default);
-            var url = $"{TraktApiUrl}/shows/trending?limit=100";
+            var url = $"{TMDBApiUrl}trending/tv/week?page=";
+            List<TMDBShow> tmdbShows = [];
 
-            using var request = new HttpRequestMessage(HttpMethod.Get, url);
-            request.Headers.Add("trakt-api-version", "2");
-            request.Headers.Add("trakt-api-key", config.TraktClientId);
+            for (var i = 1; i <= 5; i++)
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Get, url + i.ToString(CultureInfo.InvariantCulture));
+                request.Headers.Add("accept", "application/json");
+                request.Headers.Add("User-Agent", "Jellyfin");
+                request.Headers.Add("Authorization", "Bearer " + config.TMDBAccessToken);
 
-            using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
+                using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
 
-            var traktShows = await response.Content.ReadFromJsonAsync<List<TraktTrendingShowResponse>>(_jsonOptions, cancellationToken).ConfigureAwait(false);
-            if (traktShows is null)
+                var jsonResponse = await response.Content.ReadFromJsonAsync<TMDBTrendingShowResponse>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+                if (jsonResponse is not null)
+                {
+                    tmdbShows.AddRange(jsonResponse.Results ?? []);
+                }
+            }
+
+            if (tmdbShows.Count == 0)
             {
                 return [];
             }
 
             var results = new List<TrendingItem>();
             int rank = 1;
-            foreach (var s in traktShows)
+            foreach (var show in tmdbShows)
             {
                 if (rank > 10)
                 {
                     break;
                 }
 
-                var show = s.Show;
-                if (show?.Ids is null)
-                {
-                    continue;
-                }
-
-                var localItem = FindLocalItem(show.Ids, new[] { BaseItemKind.Series });
+                var localItem = FindLocalItem(show.Id, new[] { BaseItemKind.Series });
                 if (localItem is not null)
                 {
                     results.Add(new TrendingItem
@@ -227,9 +234,8 @@ public class TrendingService : ITrendingService
                         Rank = rank,
                         Title = localItem.Name ?? show.Title ?? string.Empty,
                         Overview = localItem.Overview ?? show.Overview ?? string.Empty,
-                        Year = localItem.ProductionYear ?? show.Year,
-                        TmdbId = show.Ids.Tmdb?.ToString(CultureInfo.InvariantCulture),
-                        ImdbId = show.Ids.Imdb,
+                        Year = localItem.ProductionYear ?? DateTime.ParseExact(show.Release_Date ?? "1970-01-01", "yyyy-MM-dd", CultureInfo.InvariantCulture).Year,
+                        TmdbId = show.Id.ToString(CultureInfo.InvariantCulture),
                         JellyfinItemId = localItem.Id
                     });
                     rank++;
@@ -240,33 +246,15 @@ public class TrendingService : ITrendingService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to fetch trending shows from Trakt");
+            _logger.LogWarning(ex, "Failed to fetch trending shows from TMDB");
             return [];
         }
     }
 
-    private BaseItem? FindLocalItem(TraktIds ids, BaseItemKind[] itemTypes)
+    private BaseItem? FindLocalItem(int id, BaseItemKind[] itemTypes)
     {
         var providerIds = new Dictionary<string, string>();
-        if (!string.IsNullOrWhiteSpace(ids.Imdb))
-        {
-            providerIds["Imdb"] = ids.Imdb;
-        }
-
-        if (ids.Tmdb.HasValue)
-        {
-            providerIds["Tmdb"] = ids.Tmdb.Value.ToString(CultureInfo.InvariantCulture);
-        }
-
-        if (ids.Tvdb.HasValue)
-        {
-            providerIds["Tvdb"] = ids.Tvdb.Value.ToString(CultureInfo.InvariantCulture);
-        }
-
-        if (providerIds.Count == 0)
-        {
-            return null;
-        }
+        providerIds["Tmdb"] = id.ToString(CultureInfo.InvariantCulture);
 
         var query = new InternalItemsQuery
         {
@@ -279,44 +267,39 @@ public class TrendingService : ITrendingService
         return items.FirstOrDefault();
     }
 
-    internal sealed class TraktTrendingMovieResponse
+    internal sealed class TMDBTrendingMovieResponse
     {
-        public TraktMovie? Movie { get; set; }
+        public int Page { get; set; }
+
+        public List<TMDBMovie>? Results { get; set; }
     }
 
-    internal sealed class TraktTrendingShowResponse
+    internal sealed class TMDBTrendingShowResponse
     {
-        public TraktShow? Show { get; set; }
+        public int Page { get; set; }
+
+        public List<TMDBShow>? Results { get; set; }
     }
 
-    internal sealed class TraktMovie
+    internal sealed class TMDBMovie
     {
         public string? Title { get; set; }
 
-        public int Year { get; set; }
+        public string? Release_Date { get; set; }
 
         public string? Overview { get; set; }
 
-        public TraktIds? Ids { get; set; }
+        public int Id { get; set; }
     }
 
-    internal sealed class TraktShow
+    internal sealed class TMDBShow
     {
         public string? Title { get; set; }
 
-        public int Year { get; set; }
+        public string? Release_Date { get; set; }
 
         public string? Overview { get; set; }
 
-        public TraktIds? Ids { get; set; }
-    }
-
-    internal sealed class TraktIds
-    {
-        public string? Imdb { get; set; }
-
-        public int? Tmdb { get; set; }
-
-        public int? Tvdb { get; set; }
+        public int Id { get; set; }
     }
 }

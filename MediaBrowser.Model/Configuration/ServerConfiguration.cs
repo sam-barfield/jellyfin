@@ -308,7 +308,7 @@ public class ServerConfiguration : BaseApplicationConfiguration
     public ReleaseCalendarConfiguration ReleaseCalendar { get; set; } = new();
 
     /// <summary>
-    /// Gets or sets the trending configuration for Trakt integration.
+    /// Gets or sets the trending configuration for TMDB integration.
     /// </summary>
     public MediaBrowser.Model.Trending.TrendingConfiguration Trending { get; set; } = new();
 }
